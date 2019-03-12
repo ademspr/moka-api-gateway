@@ -85,12 +85,27 @@ export default class Server {
 		});
 		const swaggerPromises = routes.map(route => axios.get(route.swagger, { httpsAgent: agent }).then(r => r.data));
 
+		const schemes = [req.protocol];
+
 		Promise.all(swaggerPromises).then(values => {
-			const b = {};
-			values.forEach((r, i) => {
-				b[i] = r;
-			});
-			res.send(b);
+			const ret = values.reduce((a, i) => {
+				if (!a) {
+					a = Object.assign({}, i);
+					a.paths = {};
+					a.definitions = {};
+				}
+				for (var key in i.paths) {
+					a.paths[i.basePath + key] = i.paths[key];
+				}
+				for (var k in i.definitions) {
+					a.definitions[i.basePath + k] = i.definitions[k];
+				}
+				return a;
+			}, false);
+			ret.schemes = schemes;
+			ret.host = null;
+			ret.basePath = null;
+			res.send(ret);
 		});
 	}
 }
