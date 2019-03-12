@@ -1,0 +1,17 @@
+[
+	{
+		"path": "^\/v1\/*",
+		"replace": "v1",
+		"redirect": "http://localhost:12104/v1/"
+	},
+	{
+		"path": "^\/v2\/*",
+		"replace": "v2",
+		"redirect": "http://localhost:12104/v2/"
+	},
+	{
+		"path": "^\/content\/*",
+		"replace": "content",
+		"redirect": "http://localhost:51372/"
+	}
+]
