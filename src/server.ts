@@ -1,14 +1,11 @@
-import express, { Application, Request, Response } from 'express';
-import { routesConfig } from './routes';
-import fs from 'fs';
-import axios from 'axios';
+import express, { Application, Request, Response } from "express";
+import fs from "fs";
+import axios from "axios";
+import https from "https";
+import http from "http";
+import cors from "cors";
+import queryString from 'query-string';
 
-import https from 'https';
-import http from 'http';
-
-import swaggerCombine from 'swagger-combine';
-
-console.log(swaggerCombine);
 
 export interface RouteConfig {
 	basePath: string,
@@ -17,6 +14,9 @@ export interface RouteConfig {
 	redirect: string,
 	swagger: string
 }
+
+const data = fs.readFileSync("routes.json");
+const routesConfig: RouteConfig[] = JSON.parse(data.toString());
 
 export default class Server {
 	private port: number;
@@ -30,7 +30,8 @@ export default class Server {
 	}
 
 	start() {
-		this.app.all('*', (req, res) => this._handlerReq(req, res));
+		console.log(this.routesConfig.map(r => r.basePath));
+		this.app.all("*", cors(), (req, res) => this._handlerReq(req, res));
 		this.app.use((req, res, next) => {
 			res.header("Access-Control-Allow-Origin", "*");
 			res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
@@ -44,8 +45,8 @@ export default class Server {
 		});
 
 		const httpsServer = https.createServer({
-			key: fs.readFileSync('server.key'),
-			cert: fs.readFileSync('server.cert')
+			key: fs.readFileSync("server.key"),
+			cert: fs.readFileSync("server.cert")
 		}, this.app);
 
 		httpsServer.listen(5030, () => {
@@ -67,12 +68,14 @@ export default class Server {
 			const redirectUrl = routeConfig.redirect;
 			const replace = routeConfig.replace;
 
-			console.log(`[${req.method}] route ${req.path} redirect to ${redirectUrl}`);
 			const redirectPath = req.path.replace(replace, "").replace("//", "");
 
-			res.redirect(`${redirectUrl}${redirectPath}`);
+			console.log(`[${req.method}] route ${req.path} redirect to ${redirectUrl}`);
+			res.redirect(307, `${redirectUrl}${redirectPath}?${queryString.stringify(req.query)}`);
+
+
 		} else {
-			console.log(`route ${req.path} dont't match.`);
+			console.log(`route ${req.path} dont"t match.`);
 			res.status(404).send("not found");
 		}
 	};
@@ -130,9 +133,9 @@ export default class Server {
 			if (typeof (definition[p]) === "object") {
 				this.resolveRefs(definition[p], alias);
 			} else {
-				if (p === '$ref') {
+				if (p === "$ref") {
 					const valueToResolve = definition[p];
-					const paths = valueToResolve.split('/');
+					const paths = valueToResolve.split("/");
 					const resolved = alias + paths[paths.length - 1];
 					paths[paths.length - 1] = resolved;
 					definition[p] = paths.join("/");
