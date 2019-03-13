@@ -95,10 +95,26 @@ export default class Server {
 					a.definitions = {};
 				}
 				for (var key in i.paths) {
-					a.paths[i.basePath + key] = i.paths[key];
+					let path = key;
+					let alias = "";
+
+					if (i.basePath) {
+						path = i.basePath.replace("/", "") + key;
+						alias = i.basePath.replace("/", "");
+					}
+
+					this.resolveRefs(i.paths[key], alias);
+					a.paths[path] = i.paths[key];
 				}
 				for (var k in i.definitions) {
-					a.definitions[i.basePath + k] = i.definitions[k];
+					let definitionPath = k;
+					let alias = "";
+					if (i.basePath) {
+						definitionPath = i.basePath.replace("/", "") + k;
+						alias = i.basePath.replace("/", "");
+					}
+					this.resolveRefs(i.definitions[k], alias);
+					a.definitions[definitionPath] = i.definitions[k];
 				}
 				return a;
 			}, false);
@@ -107,6 +123,22 @@ export default class Server {
 			ret.basePath = null;
 			res.send(ret);
 		});
+	}
+	private resolveRefs(definition: {}, alias: string) {
+
+		for (var p in definition) {
+			if (typeof (definition[p]) === "object") {
+				this.resolveRefs(definition[p], alias);
+			} else {
+				if (p === '$ref') {
+					const valueToResolve = definition[p];
+					const paths = valueToResolve.split('/');
+					const resolved = alias + paths[paths.length - 1];
+					paths[paths.length - 1] = resolved;
+					definition[p] = paths.join("/");
+				}
+			}
+		}
 	}
 }
 
