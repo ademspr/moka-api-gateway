@@ -49,13 +49,12 @@ export default class GatewayServer {
 			console.log(chalk.green(`Moka gatway listening http on port ${this.httpPort}!`));
 		});
 
-		const httpsServer = https.createServer({
-			key: fs.readFileSync("server.key"),
-			cert: fs.readFileSync("server.cert")
-		}, this.app);
-
-
 		if (this.sslPort) {
+			const httpsServer = https.createServer({
+				key: fs.readFileSync("server.key"),
+				cert: fs.readFileSync("server.cert")
+			}, this.app);
+
 			httpsServer.listen(this.sslPort, () => {
 				console.log(chalk.greenBright(`Moka gatway listening https on port ${this.sslPort}!`));
 			});
