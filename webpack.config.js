@@ -1,5 +1,6 @@
-var path = require('path');
-var fs = require('fs');
+const path = require('path');
+const fs = require('fs');
+const webpack = require('webpack');
 
 var nodeModules = {};
 fs.readdirSync('node_modules')
@@ -25,10 +26,12 @@ module.exports = {
 	module: {
 		rules: [
 			{ test: /\.ts$/, loader: 'ts-loader' },
-			{ test: /\.ts$/, loader: 'shebang-loader' },
 			{ test: /\.json$/, loader: 'json-loader' }
 		]
 	},
+	plugins: [
+		new webpack.BannerPlugin({ banner: "#!/usr/bin/env node", raw: true })
+	],
 	target: "node",
 	externals: nodeModules,
 	devServer: {
