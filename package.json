@@ -16,7 +16,7 @@
   "author": "Ademir Pereira <ademspr@live.com>",
   "license": "ISC",
   "bin": {
-    "mocka-gateway": "./dist/index.js"
+    "moka-gateway": "./dist/index.js"
   },
   "dependencies": {
     "@types/axios": "^0.14.0",
