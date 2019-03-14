@@ -28,7 +28,7 @@ export default class MokaCli {
 			console.error(chalk.red("routes files not exists" + routesFile));
 			return;
 		}
-		this._server = new GatewayServer(port, sslPort);
+		this._server = new GatewayServer(port, sslPort, routesFile);
 		this._server.start();
 	}
 }

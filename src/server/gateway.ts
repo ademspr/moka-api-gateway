@@ -14,10 +14,6 @@ export interface RouteConfig {
 	redirect: string,
 	swagger: string
 }
-
-const data = fs.readFileSync("routes.json");
-const routesConfig: RouteConfig[] = JSON.parse(data.toString());
-
 export default class GatewayServer {
 	private httpPort: number;
 	private sslPort: number | undefined;
@@ -25,11 +21,15 @@ export default class GatewayServer {
 	private app: Application;
 	private routesConfig: RouteConfig[];
 
-	constructor(port: number, sslPort: number | undefined) {
+	constructor(port: number, sslPort: number | undefined, routesFile: string) {
 		this.httpPort = port;
 		this.sslPort = sslPort;
 
 		this.app = express();
+
+		const data = fs.readFileSync("routes.json");
+		const routesConfig: RouteConfig[] = JSON.parse(data.toString());
+
 		this.routesConfig = routesConfig;
 	}
 
