@@ -1,11 +1,11 @@
 import express, { Application, Request, Response } from "express";
 import fs from "fs";
-import axios from "axios";
 import https from "https";
 import http from "http";
 import cors from "cors";
 import queryString from 'query-string';
-
+import axios from "axios";
+import chalk from "chalk";
 
 export interface RouteConfig {
 	basePath: string,
@@ -18,30 +18,35 @@ export interface RouteConfig {
 const data = fs.readFileSync("routes.json");
 const routesConfig: RouteConfig[] = JSON.parse(data.toString());
 
-export default class Server {
-	private port: number;
+export default class GatewayServer {
+	private httpPort: number;
+	private sslPort: number | undefined;
+
 	private app: Application;
 	private routesConfig: RouteConfig[];
 
-	constructor(port: number) {
-		this.port = port;
+	constructor(port: number, sslPort: number | undefined) {
+		this.httpPort = port;
+		this.sslPort = sslPort;
+
 		this.app = express();
 		this.routesConfig = routesConfig;
 	}
 
+
 	start() {
-		console.log(this.routesConfig.map(r => r.basePath));
+		console.log(chalk.blue('routes ' + JSON.stringify(this.routesConfig.map(r => r.basePath))));
+		console.log(chalk.red('CTRL + C for end gateway'));
 		this.app.all("*", cors(), (req, res) => this._handlerReq(req, res));
 		this.app.use((req, res, next) => {
 			res.header("Access-Control-Allow-Origin", "*");
 			res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 			next();
 		});
-
 		const httpServer = http.createServer(this.app);
 
-		httpServer.listen(this.port, () => {
-			console.log(`Moka gatway listening http on port ${this.port}!`);
+		httpServer.listen(this.httpPort, () => {
+			console.log(chalk.green(`Moka gatway listening http on port ${this.httpPort}!`));
 		});
 
 		const httpsServer = https.createServer({
@@ -49,9 +54,12 @@ export default class Server {
 			cert: fs.readFileSync("server.cert")
 		}, this.app);
 
-		httpsServer.listen(5030, () => {
-			console.log(`Moka gatway listening https on port ${5030}!`);
-		});
+
+		if (this.sslPort) {
+			httpsServer.listen(this.sslPort, () => {
+				console.log(chalk.greenBright(`Moka gatway listening https on port ${this.sslPort}!`));
+			});
+		}
 
 	}
 
@@ -70,12 +78,12 @@ export default class Server {
 
 			const redirectPath = req.path.replace(replace, "").replace("//", "");
 
-			console.log(`[${req.method}] route ${req.path} redirect to ${redirectUrl}`);
+			console.log(chalk.blue(`[${req.method}] route ${req.path} redirect to ${redirectUrl}`));
 			res.redirect(307, `${redirectUrl}${redirectPath}?${queryString.stringify(req.query)}`);
 
 
 		} else {
-			console.log(`route ${req.path} dont"t match.`);
+			console.log(chalk.red(`route ${req.path} dont"t match.`));
 			res.status(404).send("not found");
 		}
 	};

@@ -1,4 +1,5 @@
-import Server from './server';
+#!/usr/bin/env node
 
-const server = new Server(5000);
-server.start();
+import MokaCli from './cli/moka-cli';
+const _ = new MokaCli();
+_.startGateway();

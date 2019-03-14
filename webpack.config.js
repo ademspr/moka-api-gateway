@@ -25,6 +25,7 @@ module.exports = {
 	module: {
 		rules: [
 			{ test: /\.ts$/, loader: 'ts-loader' },
+			{ test: /\.ts$/, loader: 'shebang-loader' },
 			{ test: /\.json$/, loader: 'json-loader' }
 		]
 	},
