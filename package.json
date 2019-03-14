@@ -1,5 +1,5 @@
 {
-  "name": "@ademspr/mocka-api-gateway",
+  "name": "@ademspr/moka-api-gateway",
   "version": "1.0.0",
   "description": "A simple mock for api gateway.",
   "main": "index.js",
@@ -16,7 +16,7 @@
   "author": "Ademir Pereira <ademspr@live.com>",
   "license": "ISC",
   "bin": {
-    "mocka-gateway": "./dist/index.js"
+    "moka-gateway": "./dist/index.js"
   },
   "dependencies": {
     "@types/axios": "^0.14.0",
