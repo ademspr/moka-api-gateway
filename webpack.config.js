@@ -1,7 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
-const copyPlugin = require('copy-webpack-plugin');
 
 var nodeModules = {};
 fs.readdirSync('node_modules')
@@ -31,11 +30,7 @@ module.exports = {
 		]
 	},
 	plugins: [
-		new webpack.BannerPlugin({ banner: "#!/usr/bin/env node", raw: true }),
-		new copyPlugin([
-			{ from: './server.cert', to: './' },
-			{ from: './server.key', to: './' },
-		])
+		new webpack.BannerPlugin({ banner: "#!/usr/bin/env node", raw: true })
 	],
 	target: "node",
 	externals: nodeModules,

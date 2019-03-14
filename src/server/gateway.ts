@@ -21,16 +21,26 @@ export default class GatewayServer {
 	private app: Application;
 	private routesConfig: RouteConfig[];
 
-	constructor(port: number, sslPort: number | undefined, routesFile: string) {
+	private cert: string | undefined;
+	private key: string | undefined;
+
+	constructor(
+		port: number,
+		routesFile: string,
+		sslPort?: number | undefined,
+		cert?: string | undefined,
+		key?: string | undefined) {
 		this.httpPort = port;
 		this.sslPort = sslPort;
 
 		this.app = express();
 
-		const data = fs.readFileSync("routes.json");
+		const data = fs.readFileSync(routesFile);
 		const routesConfig: RouteConfig[] = JSON.parse(data.toString());
 
 		this.routesConfig = routesConfig;
+		this.cert = cert;
+		this.key = key;
 	}
 
 
@@ -43,22 +53,29 @@ export default class GatewayServer {
 			res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 			next();
 		});
-		const httpServer = http.createServer(this.app);
 
+
+		if (this.sslPort !== undefined) {
+			if (this.cert !== undefined && this.key !== undefined) {
+				const httpsServer = https.createServer({
+					key: fs.readFileSync(this.key),
+					cert: fs.readFileSync(this.cert)
+				}, this.app);
+
+				httpsServer.listen(this.sslPort, () => {
+					console.log(chalk.greenBright(`Moka gatway listening https on port ${this.sslPort}!`));
+				});
+			} else {
+				console.error(chalk.red("HTTPS require certificate !"));
+				return;
+			}
+		}
+
+
+		const httpServer = http.createServer(this.app);
 		httpServer.listen(this.httpPort, () => {
 			console.log(chalk.green(`Moka gatway listening http on port ${this.httpPort}!`));
 		});
-
-		if (this.sslPort === undefined) {
-			const httpsServer = https.createServer({
-				key: fs.readFileSync("./server.key"),
-				cert: fs.readFileSync("./server.cert")
-			}, this.app);
-
-			httpsServer.listen(this.sslPort, () => {
-				console.log(chalk.greenBright(`Moka gatway listening https on port ${this.sslPort}!`));
-			});
-		}
 
 	}
 

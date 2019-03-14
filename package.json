@@ -1,6 +1,6 @@
 {
   "name": "@ademspr/moka-api-gateway",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A simple mock for api gateway.",
   "main": "index.js",
   "homepage": "https://github.com/ademspr/moka-api-gateway",
@@ -11,7 +11,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack -p",
-    "start": "webpack -p && node ./dist/index.js -p 5000 --ssl 50030 -r ./routes.json"
+    "start": "webpack -p && node ./dist/index.js -p 5000 --ssl 50030 -r ./routes.json -c ./server.cert -k ./server.key"
   },
   "author": "Ademir Pereira <ademspr@live.com>",
   "license": "ISC",
