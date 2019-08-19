@@ -105,6 +105,7 @@ export default class GatewayServer {
 	};
 
 	private _resolveSwagger = (req: Request, res: Response) => {
+		console.log(chalk.blue("swagger"));
 		const routes = this.routesConfig.filter(route => route.swagger !== "");
 
 		const agent = new https.Agent({
